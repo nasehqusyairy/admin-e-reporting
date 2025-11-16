@@ -18,6 +18,7 @@ import {
 import type { RouteModule } from "~/models/route-module"
 import { FirebaseProvider } from "../providers/firebase"
 import { getUser } from "~/lib/get-user"
+import TransitionProgressbar from "../transition-progressbar"
 
 export const clientLoader: ClientLoaderFunction = async () => {
     const user = await getUser();
@@ -85,6 +86,7 @@ const SidebarLayout = () => {
 export default () => {
     return (
         <FirebaseProvider >
+            <TransitionProgressbar />
             <SidebarLayout />
         </FirebaseProvider>
     )
