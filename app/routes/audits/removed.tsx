@@ -20,7 +20,7 @@ export default () => {
 
     const { hidden, updating, loading, restore, q } = useOutletContext() as AuditRouteContext
 
-    const filtered = hidden.filter(el => el.year.toString().includes(q))
+    const filtered = hidden.filter(el => el.year.toString().includes(q)).sort((a, b) => b.year - a.year)
 
     return (
         <>

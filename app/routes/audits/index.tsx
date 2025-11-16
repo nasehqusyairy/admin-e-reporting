@@ -64,7 +64,7 @@ export default () => {
     }
   }
 
-  const filtered = available.filter(el => el.year.toString().includes(q))
+  const filtered = available.filter(el => el.year.toString().includes(q)).sort((a, b) => b.year - a.year)
 
   return (
     <>
