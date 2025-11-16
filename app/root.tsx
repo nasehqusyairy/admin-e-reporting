@@ -9,6 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { Toaster } from "sonner";
+import LoadingScreen from "./components/loading-screen";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -23,6 +25,16 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+export function meta({ }: Route.MetaArgs) {
+  return [
+    { title: "Admin | E-Reporting Surabaya" },
+  ];
+}
+
+export function HydrateFallback() {
+  return <LoadingScreen />;
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -34,6 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -62,11 +75,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
+    <main className="mx-auto p-4 pt-16 container">
       <h1>{message}</h1>
       <p>{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre className="p-4 w-full overflow-x-auto">
           <code>{stack}</code>
         </pre>
       )}
