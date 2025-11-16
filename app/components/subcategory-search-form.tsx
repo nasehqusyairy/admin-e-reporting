@@ -35,7 +35,7 @@ export default ({ searchParams, setSearchParams, q, cat, categories }: SubCatego
     }
 
     return (
-        <form className="lg:flex gap-2" onSubmit={onSubmit}>
+        <form className="lg:flex gap-2 mb-4" onSubmit={onSubmit}>
             <Input className="mb-4" name="q" value={term} onChange={(evt) => setTerm(evt.target.value)} placeholder="Cari berdasarkan uraian..." />
             <Select name="cat" value={selectedCat} defaultValue={cat} onValueChange={(val) => setSelectedCat(val)}>
                 <SelectTrigger className="mb-4 w-full" name="category" id="category">
@@ -48,8 +48,8 @@ export default ({ searchParams, setSearchParams, q, cat, categories }: SubCatego
                     ))}
                 </SelectContent>
             </Select>
-            <Button disabled={clicked}>
-                <Search />
+            <Button disabled={clicked} type="submit" className="w-full lg:w-auto">
+                <Search /> <span className="lg:hidden">Cari</span>
             </Button>
         </form>
     )
