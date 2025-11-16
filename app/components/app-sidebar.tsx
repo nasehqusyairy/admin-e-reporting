@@ -11,7 +11,7 @@ import {
   SidebarRail,
 } from "~/components/ui/sidebar"
 import logo from "~/images/logo.webp"
-import { LogOut } from "lucide-react"
+import { LogOut, SunMoon } from "lucide-react"
 
 import { signOut } from "firebase/auth"
 import { useFirebase } from "./providers/firebase"
@@ -24,7 +24,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
   const { auth } = useFirebase()
 
-  const handleLogout = async () => {
+  const logout = async () => {
     try {
       await signOut(auth)
       window.location.href = "/auth"
@@ -32,6 +32,11 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
       console.error("Logout failed:", err)
       toast.error(`Terjadi kesalahan saat logout`)
     }
+  }
+
+  const changeTheme = () => {
+    localStorage.theme = localStorage.theme === "dark" ? "light" : "dark"
+    document.documentElement.classList.toggle("dark")
   }
 
   return (
@@ -58,6 +63,11 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
+            <SidebarMenuButton onClick={changeTheme}>
+              <SunMoon /> Ganti Tema
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <SidebarMenuButton>
@@ -72,10 +82,10 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <Button variant={"outline"} onClick={handleLogout}>
+                  <Button variant={"outline"} onClick={logout}>
                     Ya
                   </Button>
-                  <AlertDialogCancel className="bg-primary hover:bg-primary/90 text-primary-foreground!">
+                  <AlertDialogCancel className="bg-primary! hover:bg-primary/90 text-primary-foreground!">
                     Batal
                   </AlertDialogCancel>
                 </AlertDialogFooter>
