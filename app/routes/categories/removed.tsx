@@ -1,32 +1,46 @@
 import { Recycle } from "lucide-react"
-import { useOutletContext } from "react-router"
+import { useFetcher, useOutletContext, type ActionFunction } from "react-router"
 import { toast } from "sonner"
 import { Button } from "~/components/ui/button"
 import { TableCell, TableRow } from "~/components/ui/table"
-import type { Category } from "~/models/schema"
+import type { Route } from "./+types"
+import { Category } from "~/.server/model"
 
 export const handle = {
     title: "Dihapus"
 }
 
 type CategoryRouteContext = {
-    hidden: Category[]
-    updating: boolean
-    loading: boolean
-    update: (id: string, data: object) => Promise<void>
     q: string
 }
 
-export default () => {
+export const loader = async () => {
+    return {
+        categories: await Category.query().where({ hidden: true }).get()
+    }
+}
 
-    const { hidden, updating, loading, update, q } = useOutletContext() as CategoryRouteContext
+export const action: ActionFunction = async ({ request }) => {
+    const formData = await request.formData();
+    const id = formData.get("id") as string;
+
+    await Category.update(id, { hidden: false });
+}
+
+export default ({ loaderData, actionData }: Route.ComponentProps) => {
+    const { categories } = loaderData
+
+    const { q } = useOutletContext() as CategoryRouteContext
+
+    const fetcher = useFetcher()
+    const updating = fetcher.state !== "idle"
 
     const restore = async (id: string) => {
-        await update(id, { hidden: false })
+        fetcher.submit({ id }, { method: "post" })
         toast.success("Data berhasil dipulihkan")
     }
 
-    const filtered = hidden.filter(el => el.description.toLowerCase().includes(q.toLowerCase()))
+    const filtered = categories.filter(el => el.description.toLowerCase().includes(q.toLowerCase()))
 
     return (
         <>
@@ -41,7 +55,7 @@ export default () => {
             )) : (
                 <TableRow>
                     <TableCell colSpan={3} className="bg-secondary text-center">
-                        {loading ? "Memuat..." : updating ? "Memperbarui..." : "Data Kosong"}
+                        {updating ? "Memperbarui..." : "Data Kosong"}
                     </TableCell>
                 </TableRow>
             )}

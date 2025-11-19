@@ -1,17 +1,13 @@
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { updateSearchParamsFromForm } from "~/lib/search-form"
-import type { URLSearchParamsInit } from "react-router"
+import { useSearchParams } from "react-router"
 import { useEffect, useState, type FormEvent } from "react"
 import { Search } from "lucide-react"
 
-type AuditSearchFormProps = {
-    searchParams: URLSearchParams
-    setSearchParams: (nextInit: URLSearchParamsInit) => void
-    q: string
-}
-
-export default ({ searchParams, setSearchParams, q }: AuditSearchFormProps) => {
+export default () => {
+    const [searchParams, setSearchParams] = useSearchParams()
+    const q = searchParams.get('q') ?? ""
     const [term, setTerm] = useState(q);
     const [clicked, setClicked] = useState(true);
 

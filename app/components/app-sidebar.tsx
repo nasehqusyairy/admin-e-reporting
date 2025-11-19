@@ -1,5 +1,5 @@
 import NavItems from "~/components/nav-items"
-import { navLinks } from "~/models/nav-links"
+import { navLinks } from "~/lib/nav-links"
 import {
   Sidebar,
   SidebarContent,
@@ -12,27 +12,20 @@ import {
 } from "~/components/ui/sidebar"
 import logo from "~/images/logo.webp"
 import { LogOut, SunMoon } from "lucide-react"
-
-import { signOut } from "firebase/auth"
-import { useFirebase } from "./providers/firebase"
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog"
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "./ui/alert-dialog"
 import { Button } from "./ui/button"
-import { toast } from "sonner"
 import { Link } from "react-router"
 
 export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-
-  const { auth } = useFirebase()
-
-  const logout = async () => {
-    try {
-      await signOut(auth)
-      window.location.href = "/auth"
-    } catch (err) {
-      console.error("Logout failed:", err)
-      toast.error(`Terjadi kesalahan saat logout`)
-    }
-  }
 
   const changeTheme = () => {
     localStorage.theme = localStorage.theme === "dark" ? "light" : "dark"
@@ -82,8 +75,8 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <Button variant={"outline"} onClick={logout}>
-                    Ya
+                  <Button variant={"outline"} asChild>
+                    <Link to="/logout">Ya</Link>
                   </Button>
                   <AlertDialogCancel className="bg-primary! hover:bg-primary/90 text-primary-foreground!">
                     Batal

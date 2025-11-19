@@ -1,39 +1,62 @@
 import { Recycle } from "lucide-react"
-import { useOutletContext } from "react-router"
+import { useFetcher, useOutletContext, type ActionFunction, type LoaderFunction } from "react-router"
 import { toast } from "sonner"
 import { Button } from "~/components/ui/button"
 import { TableCell, TableRow } from "~/components/ui/table"
-import type { SubCategory } from "~/models/schema"
+import type { ICategory, ISubCategory } from "~/models/schema"
+import type { Route } from "./+types/removed"
+import { SubCategory } from "~/.server/model"
+
+type SubCategoryRouteContext = {
+    categoryMap: Record<string, ICategory>
+}
 
 export const handle = {
     title: "Dihapus"
 }
 
-type SubCategoryRouteContext = {
-    hidden: SubCategory[]
-    updating: boolean
-    loading: boolean
-    update: (id: string, data: object) => Promise<void>
-    q: string
-    cat: string
+export const loader: LoaderFunction = async ({ request }) => {
+    const url = new URL(request.url)
+
+    const q = url.searchParams.get('q') || ""
+    const cat = url.searchParams.get('cat') || "all"
+
+    const query = SubCategory.query()
+        .where({ hidden: true })
+        .where('description', 'LIKE', `%${q}%`)
+
+    return {
+        subCategories: await (cat === 'all' ? query : query.where({ category_id: cat })).get()
+    }
 }
 
-export default () => {
+export const action: ActionFunction = async ({ request }) => {
+    const formData = await request.formData();
+    const id = formData.get("id") as string;
 
-    const { hidden, updating, loading, update, q, cat } = useOutletContext() as SubCategoryRouteContext
+    await SubCategory.update(id, { hidden: false });
+}
+
+export default ({ loaderData }: Route.ComponentProps) => {
+    const { subCategories } = loaderData
+
+    const { categoryMap } = useOutletContext() as SubCategoryRouteContext
+
+    const related = subCategories.map(el => ({ ...el, category: categoryMap[el.category_id] })) as ISubCategory[]
+
+    const fetcher = useFetcher()
+    const updating = fetcher.state !== "idle"
 
     const restore = async (id: string) => {
-        await update(id, { hidden: false })
+        await fetcher.submit({ id }, { method: "POST" })
         toast.success("Data berhasil dipulihkan")
     }
 
-    const filtered = hidden.filter(el => cat && cat !== "all" ? el.category!.id === cat : true).filter(el => el.description.toLowerCase().includes(q.toLowerCase()))
-
     return (
         <>
-            {filtered?.length > 0 ? filtered.map((el, index) => (
+            {related?.length > 0 ? related.map((el, index) => (
                 <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{el.id}</TableCell>
                     <TableCell>{el.description}</TableCell>
                     <TableCell>{el.category?.description}</TableCell>
                     <TableCell>
@@ -43,7 +66,7 @@ export default () => {
             )) : (
                 <TableRow>
                     <TableCell colSpan={4} className="bg-secondary text-center">
-                        {loading ? "Memuat..." : updating ? "Memperbarui..." : "Data Kosong"}
+                        {updating ? "Memperbarui..." : "Data Kosong"}
                     </TableCell>
                 </TableRow>
             )}

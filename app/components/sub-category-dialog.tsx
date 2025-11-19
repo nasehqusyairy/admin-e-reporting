@@ -1,12 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react"
 import { Button } from "./ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from "./ui/dialog"
 import {
     Select,
     SelectContent,
@@ -16,49 +8,43 @@ import {
 } from "./ui/select"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
-import type { Category, SubCategory } from "~/models/schema"
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "./ui/input-group"
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+    InputGroupText
+} from "./ui/input-group"
+import { Card, CardContent } from "./ui/card"
+import { Link, useFetcher } from "react-router"
+import type { ICategory, ISubCategory } from "~/models/schema"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 type SubCategoryDialogProps = {
-    idToEdit?: string
-    subCategories: SubCategory[]
-    categories: Category[]
-    onClose: () => void
-    onsubmit: (code: string, description: string, categoryId: string, idToEdit?: string) => void
-    updating: boolean
+    item?: ISubCategory
+    categories: ICategory[]
 }
 
-export default ({ idToEdit, onClose, categories, onsubmit, updating, subCategories }: SubCategoryDialogProps) => {
-
-    const currentItem = idToEdit ? subCategories.find(el => el.id === idToEdit) : undefined
-
-    const [selected, setSelected] = useState<string>();
-
-    const submit = (evt: FormEvent<HTMLFormElement>) => {
-        evt.preventDefault()
-        const form = evt.currentTarget
-        onsubmit(form.code.value, form.description.value, selected!, idToEdit)
-    }
-
-    const catCode = categories.find(el => el.id === selected)?.code
+export default ({ categories, item }: SubCategoryDialogProps) => {
+    const [selected, setSelected] = useState(item?.category_id);
+    const fetcher = useFetcher()
+    const updating = fetcher.state !== "idle"
 
     useEffect(() => {
-        setSelected(currentItem?.category?.id)
-    }, [currentItem]);
+        if (fetcher.data?.error) {
+            toast.error(fetcher.data.error)
+        }
+    }, [fetcher.data]);
 
     return (
-        <Dialog open={idToEdit !== undefined} onOpenChange={onClose}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>
-                        {idToEdit ? "Ubah" : ""} Sub Kategori {!idToEdit ? "Baru" : ""}
-                    </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={submit}>
+        <Card>
+            <CardContent>
+                <fetcher.Form method="POST">
+                    <input type="hidden" name="old_id" value={item?.id} />
                     <div className="mb-4">
                         <Label htmlFor="category" className="mb-2">Kategori</Label>
-                        <Select required value={selected} onValueChange={(val) => setSelected(val)}>
-                            <SelectTrigger className="w-full" name="category" id="category">
+                        <Select required value={selected} onValueChange={(val) => setSelected(val)} name="category_id">
+                            <SelectTrigger className="w-full" id="category">
                                 <SelectValue placeholder="Pilih Kategori" />
                             </SelectTrigger>
                             <SelectContent>
@@ -69,25 +55,28 @@ export default ({ idToEdit, onClose, categories, onsubmit, updating, subCategori
                         </Select>
                     </div>
                     <div className="mb-4">
-                        <Label htmlFor="code" className="mb-2">Kode</Label>
+                        <Label htmlFor="id" className="mb-2">Kode</Label>
                         <InputGroup>
                             <InputGroupAddon>
                                 <InputGroupText>
-                                    {catCode}.
+                                    {selected}.
                                 </InputGroupText>
                             </InputGroupAddon>
-                            <InputGroupInput required defaultValue={currentItem?.code} name="code" id="code" />
+                            <InputGroupInput required defaultValue={item?.id.split('.')[1]} name="id" id="id" />
                         </InputGroup>
                     </div>
                     <div className="mb-4">
                         <Label htmlFor="description" className="mb-2">Uraian</Label>
-                        <Input required defaultValue={currentItem?.description} name="description" id="description" />
+                        <Input required defaultValue={item?.description} name="description" id="description" />
                     </div>
-                    <DialogFooter>
-                        <Button disabled={updating}>{updating ? "Memperbarui..." : "Simpan"}</Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+                    <div className="flex gap-2">
+                        <Button disabled={updating}>{!updating ? "Simpan" : item ? "Memperbarui..." : "Menambahkan..."}</Button>
+                        <Button variant={"secondary"} asChild>
+                            <Link to={'/subcategories'}>Kembali</Link>
+                        </Button>
+                    </div>
+                </fetcher.Form>
+            </CardContent>
+        </Card>
     )
 }

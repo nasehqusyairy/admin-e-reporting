@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect } from "react"
 import { cn } from "~/lib/utils"
 import { Button } from "~/components/ui/button"
 import {
@@ -14,39 +14,19 @@ import {
   FieldLabel
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
-
-import { signInWithEmailAndPassword } from "firebase/auth"
 import { toast } from "sonner"
-import { getFirebaseInstance } from "~/lib/get-firebase"
+import { useFetcher } from "react-router"
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
 
-  const { auth } = getFirebaseInstance()
+  const fetcher = useFetcher()
+  const loading = fetcher.state !== "idle"
 
-  const [loading, setLoading] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
-
-    const form = e.currentTarget
-    const email = form.email.value
-    const password = form.password.value
-
-    try {
-      await signInWithEmailAndPassword(auth, email, password)
-      window.location.href = "/"
-
-    } catch (err: any) {
-      console.error(err)
-      toast.error(err.message || "Gagal login")
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    if (fetcher.data?.error) {
+      toast.error(`Terjadi kesalahan saat masuk: ${fetcher.data?.error}`)
     }
-  }
+  }, [fetcher.data?.error]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -59,7 +39,7 @@ export function LoginForm({
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <fetcher.Form method="POST">
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -89,7 +69,7 @@ export function LoginForm({
               </Field>
 
             </FieldGroup>
-          </form>
+          </fetcher.Form>
         </CardContent>
       </Card>
     </div>

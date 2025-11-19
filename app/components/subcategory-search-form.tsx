@@ -2,20 +2,20 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { updateSearchParamsFromForm } from "~/lib/search-form"
-import type { URLSearchParamsInit } from "react-router"
+import { useSearchParams } from "react-router"
 import { useEffect, useState, type FormEvent } from "react"
-import type { Category } from "~/models/schema"
 import { Search } from "lucide-react"
+import type { ICategory } from "~/models/schema"
 
 type SubCategorySearchFormProps = {
-    searchParams: URLSearchParams
-    setSearchParams: (nextInit: URLSearchParamsInit) => void
-    q: string
-    cat: string
-    categories: Category[]
+    categories: ICategory[]
 }
 
-export default ({ searchParams, setSearchParams, q, cat, categories }: SubCategorySearchFormProps) => {
+export default ({ categories }: SubCategorySearchFormProps) => {
+    const [searchParams, setSearchParams] = useSearchParams()
+    const q = searchParams.get('q') ?? ""
+    const cat = searchParams.get('cat') ?? "all"
+
     const [term, setTerm] = useState(q);
     const [selectedCat, setSelectedCat] = useState(cat);
     const [clicked, setClicked] = useState(true);
@@ -30,6 +30,7 @@ export default ({ searchParams, setSearchParams, q, cat, categories }: SubCatego
     }, [selectedCat, term]);
 
     const onSubmit = (evt: FormEvent<HTMLFormElement>) => {
+        evt.preventDefault()
         updateSearchParamsFromForm(evt, searchParams, setSearchParams)
         setClicked(true)
     }

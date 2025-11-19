@@ -1,49 +1,51 @@
-import type { DocumentData, DocumentReference } from "firebase/firestore";
-
-export type DBRecord = {
+export type IDBRecord = {
     id: string;
     hidden: boolean
 }
 
-export type Budget = {
-    code: string;
-    description: string;
-} & DBRecord
+export type IUser = {
+    email: string;
+    password: string;
+} & IDBRecord
 
-export type Analyzable = {
+export type IBudget = {
+    code: string
+    description: string;
+} & IDBRecord
+
+export type IAnalyzable = {
     target: number;
     realization: number;
 }
 
-export type Yearly = {
+export type IYearly = {
     year: number
 }
 
-export type Audit = Yearly & DBRecord
+export type IAudit = IYearly & { hidden: boolean }
 
-export type Category = {
-    subcategories?: SubCategory[]
-} & Budget
+export type ICategory = {
+    subcategories?: ISubCategory[]
+} & IBudget
 
-export type SubCategory = {
-    category_ref: DocumentReference<DocumentData, DocumentData>
-    category?: Category
-} & Budget
+export type ISubCategory = {
+    category_id: string
+    category?: ICategory
+} & IBudget
 
-export type Program = {
-    subcategory_ref: DocumentReference<DocumentData, DocumentData>
-    subcategory?: SubCategory
-    audit_ref: DocumentReference<DocumentData, DocumentData>
-    audit?: Audit
+export type IProgram = {
+    subcategory_id: string
+    subcategory?: ISubCategory
+    audit?: IAudit
 
-} & Budget & Yearly
+} & IBudget & IYearly
 
-export type Activity = {
-    program_ref: DocumentReference<DocumentData, DocumentData>
-    program?: Program
-} & Budget & Yearly
+export type IActivity = {
+    program_id: string
+    program?: IProgram
+} & IBudget & IYearly
 
-export type Expense = {
-    activity_ref: DocumentReference<DocumentData, DocumentData>
-    activity?: Activity
-} & Budget & Yearly & Analyzable
+export type IExpense = {
+    activity_id: string
+    activity?: IActivity
+} & IBudget & IYearly & IAnalyzable

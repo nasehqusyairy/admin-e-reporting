@@ -1,56 +1,47 @@
-import { type FormEvent } from "react"
+import { useEffect } from "react"
 import { Button } from "./ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from "./ui/dialog"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
-import type { Category } from "~/models/schema"
+import { Card, CardContent } from "./ui/card"
+import type { ICategory } from "~/models/schema"
+import { Link, useFetcher } from "react-router"
+import { toast } from "sonner"
 
 type CategoryDialogProps = {
-    idToEdit?: string
-    onClose: () => void
-    onsubmit: (code: string, description: string, idToEdit?: string) => void
-    updating: boolean
-    categories: Category[]
+    item?: ICategory
 }
 
-export default ({ idToEdit, onClose, onsubmit, updating, categories }: CategoryDialogProps) => {
+export default ({ item }: CategoryDialogProps) => {
+    const fetcher = useFetcher()
+    const updating = fetcher.state !== "idle"
 
-    const submit = (evt: FormEvent<HTMLFormElement>) => {
-        evt.preventDefault()
-        const form = evt.currentTarget
-        onsubmit(form.code.value, form.description.value, idToEdit)
-    }
-
-    const currentItem = idToEdit ? categories.find(el => el.id === idToEdit) : undefined
+    useEffect(() => {
+        if (fetcher.data?.error) {
+            toast.error(fetcher.data.error)
+        }
+    }, [fetcher.data?.error]);
 
     return (
-        <Dialog open={idToEdit !== undefined} onOpenChange={onClose}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>
-                        {idToEdit ? "Ubah" : ""} Kategori {!idToEdit ? "Baru" : ""}
-                    </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={submit}>
+        <Card>
+            <CardContent>
+                <fetcher.Form method="POST">
+                    <input type="hidden" name="old_id" value={item?.id} />
                     <div className="mb-4">
-                        <Label htmlFor="code" className="mb-2">Kode</Label>
-                        <Input required defaultValue={currentItem?.code} name="code" id="code" type="number" />
+                        <Label htmlFor="id" className="mb-2">Kode</Label>
+                        <Input required defaultValue={fetcher.data?.id || item?.id} name="id" id="id" type="number" />
                     </div>
                     <div className="mb-4">
                         <Label htmlFor="description" className="mb-2">Uraian</Label>
-                        <Input required defaultValue={currentItem?.description} name="description" id="description" />
+                        <Input required defaultValue={fetcher.data?.description || item?.description} name="description" id="description" />
                     </div>
-                    <DialogFooter>
-                        <Button disabled={updating}>{updating ? "Memperbarui..." : "Simpan"}</Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+                    <div className="flex gap-2">
+                        <Button disabled={updating}>{!updating ? "Simpan" : item ? "Memperbarui..." : "Menambahkan..."}</Button>
+                        <Button variant={"secondary"} asChild>
+                            <Link to={'/categories'}>Kembali</Link>
+                        </Button>
+                    </div>
+                </fetcher.Form>
+            </CardContent>
+        </Card>
     )
 }

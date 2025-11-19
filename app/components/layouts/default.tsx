@@ -1,4 +1,4 @@
-import { Link, Outlet, redirect, useMatches, type ClientLoaderFunction } from "react-router"
+import { Link, Outlet, redirect, useMatches, type MiddlewareFunction } from "react-router"
 import { Fragment } from "react/jsx-runtime"
 import AppSidebar from "~/components/app-sidebar"
 import {
@@ -16,16 +16,18 @@ import {
     SidebarTrigger,
 } from "~/components/ui/sidebar"
 import type { RouteModule } from "~/models/route-module"
-import { FirebaseProvider } from "../providers/firebase"
-import { getUser } from "~/lib/get-user"
 import TransitionProgressbar from "../transition-progressbar"
+import { getSession } from "~/.server/session"
 
-export const clientLoader: ClientLoaderFunction = async () => {
-    const user = await getUser();
-    if (!user) {
-        throw redirect("/auth");
+export const middleware: MiddlewareFunction[] = [
+    async ({ request }, next) => {
+        const session = await getSession(request.headers.get("Cookie"))
+        if (!session.get("userId")) {
+            return redirect("/login")
+        }
+        return next()
     }
-}
+]
 
 const SidebarLayout = () => {
     const matches = useMatches() as RouteModule[]
@@ -85,9 +87,9 @@ const SidebarLayout = () => {
 
 export default () => {
     return (
-        <FirebaseProvider >
+        <>
             <TransitionProgressbar />
             <SidebarLayout />
-        </FirebaseProvider>
+        </>
     )
 }
