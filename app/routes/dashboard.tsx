@@ -3,7 +3,6 @@ import { Link, type LoaderFunction } from "react-router";
 import { Audit, Category, SubCategory } from "~/.server/model";
 import { Card, CardContent } from "~/components/ui/card";
 import { navLinks } from "~/lib/nav-links";
-import type { Route } from "./+types/dashboard";
 
 export const handle = {
   title: navLinks.find(el => el.url === '/')!.name
@@ -19,7 +18,7 @@ export const loader: LoaderFunction = async () => {
   }
 }
 
-export default ({ loaderData: { totals } }: Route.ComponentProps) => {
+export default ({ loaderData: { totals } }: { loaderData: { totals: any } }) => {
   return (
     <div className="mx-auto container">
       <div className="lg:flex gap-4">

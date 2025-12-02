@@ -16,6 +16,7 @@ export const handle = {
 }
 
 export const action: ActionFunction = async ({ request }) => {
+    const start = performance.now();
     const session = await getSession(request.headers.get('Cookie'))
     const formData = await request.formData()
 
@@ -37,6 +38,11 @@ export const action: ActionFunction = async ({ request }) => {
         await Program.insert(programs)
         await Activity.insert(activities)
         await Expense.insert(expenses)
+
+        const end = performance.now();
+        const duration = end - start;
+
+        console.log(`[UJI KINERJA] Waktu Total Proses Bun: ${duration.toFixed(2)} ms`);
 
         return await pass(session, '/audits', "Dokumen berhasil diunggah")
     } catch (err: any) {
